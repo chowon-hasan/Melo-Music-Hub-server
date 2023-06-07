@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const port = process.env.PORT || 5000;
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 
 app.use(cors());
@@ -45,6 +45,20 @@ async function run() {
       const classes = req.body;
       console.log(classes);
       const result = await addClasses.insertOne(classes);
+      res.send(result);
+    });
+
+    app.patch("/addclasses/:id", async (req, res) => {
+      const id = req.params.id;
+      const status = req.body.status;
+      const filter = { classID: id };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          status: status,
+        },
+      };
+      const result = await addClasses.updateOne(filter, updateDoc, options);
       res.send(result);
     });
 
