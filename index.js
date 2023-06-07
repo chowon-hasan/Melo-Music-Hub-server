@@ -26,6 +26,7 @@ async function run() {
 
     const classes = client.db("meloMusicDb").collection("musicClasses");
     const instructor = client.db("meloMusicDb").collection("instructor");
+    const addClasses = client.db("meloMusicDb").collection("addClasses");
 
     app.get("/classes", async (req, res) => {
       const result = await classes.find().sort({ students: -1 }).toArray();
@@ -37,6 +38,13 @@ async function run() {
         .find()
         .sort({ num_students: -1 })
         .toArray();
+      res.send(result);
+    });
+
+    app.post("/addclasses", async (req, res) => {
+      const classes = req.body;
+      console.log(classes);
+      const result = await addClasses.insertOne(classes);
       res.send(result);
     });
 
