@@ -41,13 +41,21 @@ async function run() {
       res.send(result);
     });
 
-    app.post("/addclasses", async (req, res) => {
-      const classes = req.body;
-      console.log(classes);
-      const result = await addClasses.insertOne(classes);
+    app.get("/addclasses/:id", async (req, res) => {
+      const id = req.params.id;
+
+      const result = await addClasses.findOne({ classID: id });
       res.send(result);
     });
 
+    app.post("/addclasses", async (req, res) => {
+      const addClassData = req.body;
+      console.log(addClassData);
+      const result = await addClasses.insertOne(addClassData);
+      res.send(result);
+    });
+
+    // set status is db
     app.patch("/addclasses/:id", async (req, res) => {
       const id = req.params.id;
       const status = req.body.status;
