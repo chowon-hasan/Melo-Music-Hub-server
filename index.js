@@ -43,8 +43,23 @@ async function run() {
 
     app.get("/addclasses/:id", async (req, res) => {
       const id = req.params.id;
-
       const result = await addClasses.findOne({ classID: id });
+      res.send(result);
+    });
+
+    app.get("/myclasses/:email", async (req, res) => {
+      const result = await addClasses
+        .find({ email: req.params.email })
+        .toArray();
+      res.send(result);
+    });
+    app.delete("/myclasses/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = {
+        _id: new ObjectId(id),
+      };
+      const result = await addClasses.deleteOne(query);
       res.send(result);
     });
 
@@ -66,6 +81,7 @@ async function run() {
           status: status,
         },
       };
+
       const result = await addClasses.updateOne(filter, updateDoc, options);
       res.send(result);
     });
