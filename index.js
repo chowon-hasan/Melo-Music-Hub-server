@@ -78,6 +78,15 @@ async function run() {
       res.send(result);
     });
 
+    // CHECK ADMIN OR NOT
+    app.get("/allstudents/admin/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const user = await studentsCollection.findOne(query);
+      const result = { admin: user?.role === "admin" };
+      res.send(result);
+    });
+
     // MAKE instructor API
     app.patch("/allstudents/instructor/:id", async (req, res) => {
       const id = req.params.id;
