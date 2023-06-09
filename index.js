@@ -157,6 +157,12 @@ async function run() {
       res.send(result);
     });
 
+    // GET Payment history FROM DB
+    app.get("/payment/history", async (req, res) => {
+      const result = await enrolledClass.find().toArray();
+      res.send(result);
+    });
+
     // DELETED CLASS FROM DB
     app.delete("/myclasses/:id", async (req, res) => {
       const id = req.params.id;
