@@ -83,7 +83,11 @@ async function run() {
       const email = req.params.email;
       const query = { email: email };
       const user = await studentsCollection.findOne(query);
-      const result = { admin: user?.role === "admin" };
+      const result = {
+        admin: user?.role === "admin",
+        instructor: user?.role === "instructor",
+        student: user?.role === "student",
+      };
       res.send(result);
     });
 
