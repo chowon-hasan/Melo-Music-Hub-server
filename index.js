@@ -152,15 +152,7 @@ async function run() {
     // GET MYCLASSES FROM DB
     app.get("/myclasses/:email", async (req, res) => {
       const email = req.params.email;
-
-      // const decodedEmail = req.decoded.email;
-      // if (email !== decodedEmail) {
-      //   return res
-      //     .status(403)
-      //     .send({ error: true, message: "Forbidden acces" });
-      // }
       const query = { email: email };
-
       const result = await addClasses.find(query).toArray();
       res.send(result);
     });
@@ -168,11 +160,21 @@ async function run() {
     // DELETED CLASS FROM DB
     app.delete("/myclasses/:id", async (req, res) => {
       const id = req.params.id;
-      console.log(id);
       const query = {
         _id: new ObjectId(id),
       };
       const result = await addClasses.deleteOne(query);
+      res.send(result);
+    });
+
+    // DELETED CLASS AFETR PAYMENT FROM DB
+    app.delete("/deletedClass/:id", async (req, res) => {
+      const classId = req.params.id;
+      const query = {
+        classID: classId,
+      };
+      const result = await addClasses.deleteOne(query);
+      console.log(result);
       res.send(result);
     });
 
@@ -186,8 +188,7 @@ async function run() {
     // PAYMENT METHOD -- CREATE INTENT
     app.post("/create-payment-intent", async (req, res) => {
       const { price } = await req.body;
-      const amount = price * 100 || 100;
-      console.log(amount);
+      const amount = price * 100;
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
         currency: "usd",
