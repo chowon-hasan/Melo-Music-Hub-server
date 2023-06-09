@@ -158,8 +158,10 @@ async function run() {
     });
 
     // GET Payment history FROM DB
-    app.get("/payment/history", async (req, res) => {
-      const result = await enrolledClass.find().toArray();
+    app.get("/payment/history/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await enrolledClass.find(query).toArray();
       res.send(result);
     });
 
