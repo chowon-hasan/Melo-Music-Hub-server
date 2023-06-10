@@ -50,7 +50,7 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-    const classes = client.db("meloMusicDb").collection("musicClasses");
+    const allClasses = client.db("meloMusicDb").collection("musicClasses");
     const instructor = client.db("meloMusicDb").collection("instructor");
     const addClasses = client.db("meloMusicDb").collection("addClasses");
     const studentsCollection = client
@@ -71,7 +71,7 @@ async function run() {
 
     // GETITING ALL THE CLASSES DATA FROM DB
     app.get("/classes", async (req, res) => {
-      const result = await classes.find().sort({ students: -1 }).toArray();
+      const result = await allClasses.find().sort({ students: -1 }).toArray();
       res.send(result);
     });
 
@@ -89,11 +89,16 @@ async function run() {
       const student = req.body;
       const query = { email: student.email };
       const existinStudent = await studentsCollection.findOne(query);
-      console.log(existinStudent);
       if (existinStudent) {
         return res.send({ message: "user already exits" });
       }
       const result = await studentsCollection.insertOne(student);
+      res.send(result);
+    });
+
+    app.post("/addClass/instructor", async (req, res) => {
+      const classData = req.body;
+      const result = await allClasses.insertOne(classData);
       res.send(result);
     });
 
