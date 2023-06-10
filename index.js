@@ -52,7 +52,10 @@ async function run() {
 
     const allClasses = client.db("meloMusicDb").collection("musicClasses");
     const instructor = client.db("meloMusicDb").collection("instructor");
-    const addClasses = client.db("meloMusicDb").collection("addClasses");
+    const studentAddClasses = client.db("meloMusicDb").collection("addClasses");
+    const instructorAddClasses = client
+      .db("meloMusicDb")
+      .collection("instructorAddClasses");
     const studentsCollection = client
       .db("meloMusicDb")
       .collection("allStudents");
@@ -96,9 +99,18 @@ async function run() {
       res.send(result);
     });
 
+    // INSTRUCTOR ADD CLASS
     app.post("/addClass/instructor", async (req, res) => {
       const classData = req.body;
-      const result = await allClasses.insertOne(classData);
+      const result = await instructorAddClasses.insertOne(classData);
+      res.send(result);
+    });
+
+    // GET INSTRUCTOR ADD CLASS BY EMAIL
+    app.get("/myclasses/instructor/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await instructorAddClasses.find(query).toArray();
       res.send(result);
     });
 
@@ -150,7 +162,7 @@ async function run() {
     // GET THE SPECIFIC CLASS DATA FROM DB
     app.get("/addclasses/:id", async (req, res) => {
       const id = req.params.id;
-      const result = await addClasses.findOne({ classID: id });
+      const result = await studentAddClasses.findOne({ classID: id });
       res.send(result);
     });
 
@@ -158,7 +170,7 @@ async function run() {
     app.get("/myclasses/:email", async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
-      const result = await addClasses.find(query).toArray();
+      const result = await studentAddClasses.find(query).toArray();
       res.send(result);
     });
 
@@ -176,7 +188,7 @@ async function run() {
       const query = {
         _id: new ObjectId(id),
       };
-      const result = await addClasses.deleteOne(query);
+      const result = await studentAddClasses.deleteOne(query);
       res.send(result);
     });
 
@@ -186,7 +198,7 @@ async function run() {
       const query = {
         classID: classId,
       };
-      const result = await addClasses.deleteOne(query);
+      const result = await studentAddClasses.deleteOne(query);
       console.log(result);
       res.send(result);
     });
@@ -194,7 +206,7 @@ async function run() {
     // POST DATA IN DB ADD CLASSES FOR A STUDENT
     app.post("/addclasses", async (req, res) => {
       const addClassData = req.body;
-      const result = await addClasses.insertOne(addClassData);
+      const result = await studentAddClasses.insertOne(addClassData);
       res.send(result);
     });
 
@@ -231,7 +243,11 @@ async function run() {
         },
       };
 
-      const result = await addClasses.updateOne(filter, updateDoc, options);
+      const result = await studentAddClasses.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
       res.send(result);
     });
 
