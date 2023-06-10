@@ -59,9 +59,9 @@ async function run() {
     const studentsCollection = client
       .db("meloMusicDb")
       .collection("allStudents");
-    const enrolledClass = client
+    const paymentHistory = client
       .db("meloMusicDb")
-      .collection("enrolledclasses");
+      .collection("paymentHistory");
 
     //JWT token
     app.post("/jwt", async (req, res) => {
@@ -133,6 +133,32 @@ async function run() {
       res.send(result);
     });
 
+    // MAKE STATUS APPROVED  API
+    app.patch("/status/approved/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          status: "approved",
+        },
+      };
+      const result = await instructorAddClasses.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
+    // MAKE STATUS DENIED  API
+    app.patch("/status/denied/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          status: "denied",
+        },
+      };
+      const result = await instructorAddClasses.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
     // CHECK ADMIN OR NOT
     app.get("/allstudents/admin/:email", async (req, res) => {
       const email = req.params.email;
@@ -174,12 +200,44 @@ async function run() {
       res.send(result);
     });
 
+    // GET ALL CLASSES ADDED BY INSTRUCTOR
+    app.get("/addedclasses/instructor", async (req, res) => {
+      const result = await instructorAddClasses.find().toArray();
+      res.send(result);
+    });
+
     // GET Payment history FROM DB
     app.get("/payment/history/:email", async (req, res) => {
       const email = req.params.email;
-      const query = { email: email };
-      const result = await enrolledClass.find(query).toArray();
+      const query = { user: email };
+      const result = await paymentHistory.find(query).toArray();
+      // console.log(result);
       res.send(result);
+    });
+
+    // GET ENROLLED CLASS BY CONDITON AFTER A STUDENT PAYMENT
+    app.get("/student/enrolledClasses/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const userEmail = req.query.userEmail;
+
+      const userQuery = { user: userEmail };
+
+      const paidUser = await paymentHistory.findOne(userQuery);
+      // console.log("paidUser", paidUser);
+
+      const classquery = { classId: id };
+      const paidClasses = await paymentHistory.findOne(classquery);
+      // console.log("PaidClasses from line 197", paidClasses);
+
+      if (userEmail === paidUser.user) {
+        const result = await allClasses.findOne({
+          _id: new ObjectId(paidClasses.classId),
+        });
+        // console.log("result", result);
+        return res.send(result);
+      }
+      res.send({ message: "no user found for this enrolled class " });
     });
 
     // DELETED CLASS FROM DB
@@ -199,7 +257,6 @@ async function run() {
         classID: classId,
       };
       const result = await studentAddClasses.deleteOne(query);
-      console.log(result);
       res.send(result);
     });
 
@@ -227,7 +284,7 @@ async function run() {
     // ENROLLED DATA POST ON DB
     app.post("/myenrolled", async (req, res) => {
       const enrolledData = req.body;
-      const result = await enrolledClass.insertOne(enrolledData);
+      const result = await paymentHistory.insertOne(enrolledData);
       res.send(result);
     });
 
