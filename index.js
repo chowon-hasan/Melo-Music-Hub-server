@@ -215,29 +215,52 @@ async function run() {
       res.send(result);
     });
 
+    // // GET ENROLLED CLASS BY CONDITON AFTER A STUDENT PAYMENT
+    // app.get("/student/enrolledClasses/:id", async (req, res) => {
+    //   const id = req.params.id;
+    //   // console.log(id);
+    //   const userEmail = req.query.userEmail;
+
+    //   const userQuery = { user: userEmail };
+
+    //   const paidUser = await paymentHistory.find(userQuery).toArray();
+    //   // console.log("paidUser", paidUser);
+
+    //   const classquery = { classId: id };
+    //   const paidClasses = await paymentHistory.findOne(classquery);
+    //   // console.log("PaidClasses from line 197", paidClasses);
+
+    //   if (userEmail === paidUser.user) {
+    //     const result = await allClasses.findOne({
+    //       _id: new ObjectId(paidClasses.classId),
+    //     });
+    //     // console.log("result", result);
+    //     return res.send(result);
+    //   }
+    //   res.send({ message: "no user found for this enrolled class " });
+    // });
+
     // GET ENROLLED CLASS BY CONDITON AFTER A STUDENT PAYMENT
-    app.get("/student/enrolledClasses/:id", async (req, res) => {
-      const id = req.params.id;
-      console.log(id);
+    app.get("/student/enrolledClasses", async (req, res) => {
       const userEmail = req.query.userEmail;
 
       const userQuery = { user: userEmail };
 
-      const paidUser = await paymentHistory.findOne(userQuery);
-      // console.log("paidUser", paidUser);
+      const paidUser = await paymentHistory.find(userQuery).toArray();
+      console.log("paidUser", paidUser);
 
-      const classquery = { classId: id };
-      const paidClasses = await paymentHistory.findOne(classquery);
-      // console.log("PaidClasses from line 197", paidClasses);
+      const dataArray = [];
 
-      if (userEmail === paidUser.user) {
-        const result = await allClasses.findOne({
-          _id: new ObjectId(paidClasses.classId),
+      for (const id of paidUser) {
+        const studentClass = await allClasses.findOne({
+          _id: new ObjectId(id.classId),
         });
-        // console.log("result", result);
-        return res.send(result);
+        dataArray.push({
+          ...studentClass,
+          paymentHistory: id,
+        });
       }
-      res.send({ message: "no user found for this enrolled class " });
+      res.send(dataArray);
     });
 
     // DELETED CLASS FROM DB
