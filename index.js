@@ -74,7 +74,10 @@ async function run() {
 
     // GETITING ALL THE CLASSES DATA FROM DB
     app.get("/classes", async (req, res) => {
-      const result = await allClasses.find().sort({ students: -1 }).toArray();
+      const result = await allClasses
+        .find({ status: "approved" })
+        .sort({ students: -1 })
+        .toArray();
       res.send(result);
     });
 
@@ -102,7 +105,7 @@ async function run() {
     // INSTRUCTOR ADD CLASS
     app.post("/addClass/instructor", async (req, res) => {
       const classData = req.body;
-      const result = await instructorAddClasses.insertOne(classData);
+      const result = await allClasses.insertOne(classData);
       res.send(result);
     });
 
@@ -110,7 +113,7 @@ async function run() {
     app.get("/myclasses/instructor/:email", async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
-      const result = await instructorAddClasses.find(query).toArray();
+      const result = await allClasses.find(query).toArray();
       res.send(result);
     });
 
@@ -142,9 +145,17 @@ async function run() {
           status: "approved",
         },
       };
-      const result = await instructorAddClasses.updateOne(filter, updateDoc);
+      const result = await allClasses.updateOne(filter, updateDoc);
       res.send(result);
     });
+
+    // // INSTRUCTOR ADD CLASS IN ALL CLASSES COLLECTION
+    // app.post("/instructorClass/allClasses", async (req, res) => {
+    //   const classData = req.body;
+    //   console.log(classData);
+    //   const result = await allClasses.insertOne(classData);
+    //   res.send(result);
+    // });
 
     // MAKE STATUS DENIED  API
     app.patch("/status/denied/:id", async (req, res) => {
@@ -155,7 +166,7 @@ async function run() {
           status: "denied",
         },
       };
-      const result = await instructorAddClasses.updateOne(filter, updateDoc);
+      const result = await allClasses.updateOne(filter, updateDoc);
       res.send(result);
     });
 
@@ -185,11 +196,11 @@ async function run() {
       res.send(result);
     });
 
-    // GET THE SPECIFIC CLASS DATA FROM DB
-    app.get("/addclasses/:id", async (req, res) => {
-      const id = req.params.id;
-      const result = await studentAddClasses.findOne({ classID: id });
+    // // GET THE SPECIFIC CLASS DATA FROM DB
+    app.get("/approved/class/", async (req, res) => {
+      const result = await allClasses.find({ status: "approved" }).toArray();
       res.send(result);
+      console.log(result);
     });
 
     // GET MYCLASSES FROM DB
@@ -200,9 +211,17 @@ async function run() {
       res.send(result);
     });
 
+    // GET  MYCLASSES STATUS FOR DISABLE BUTTONS
+    app.get("/myclasses/status/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { classID: id };
+      const result = await studentAddClasses.findOne(query);
+      res.send(result);
+    });
+
     // GET ALL CLASSES ADDED BY INSTRUCTOR
     app.get("/addedclasses/instructor", async (req, res) => {
-      const result = await instructorAddClasses.find().toArray();
+      const result = await allClasses.find().toArray();
       res.send(result);
     });
 
@@ -243,11 +262,10 @@ async function run() {
     // GET ENROLLED CLASS BY CONDITON AFTER A STUDENT PAYMENT
     app.get("/student/enrolledClasses", async (req, res) => {
       const userEmail = req.query.userEmail;
-
       const userQuery = { user: userEmail };
 
       const paidUser = await paymentHistory.find(userQuery).toArray();
-      console.log("paidUser", paidUser);
+      // console.log("paidUser", paidUser);
 
       const dataArray = [];
 
