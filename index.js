@@ -196,6 +196,20 @@ async function run() {
       res.send(result);
     });
 
+    // UPDATE AVAILABLE SEATS AND STUDENTS
+    app.patch("/update/seats/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $inc: {
+          available_seats: -1,
+          students: +1,
+        },
+      };
+      const result = await allClasses.findOneAndUpdate(filter, updateDoc);
+      res.send(result);
+    });
+
     // // GET THE SPECIFIC CLASS DATA FROM DB
     app.get("/approved/class/", async (req, res) => {
       const result = await allClasses.find({ status: "approved" }).toArray();
